@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>情景设定 - 航班预测系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header-title h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-title p {
+            margin: 0;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            min-width: 80px;
+            text-align: center;
+            gap: 5px;
+        }
+
+        .nav-btn i {
+            font-size: 1.2em;
+        }
+
+        .nav-btn span {
+            font-size: 0.9em;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 25px;
+            border-left: 4px solid #e17055;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #e17055;
+        }
+
+        .time-input {
+            width: 150px;
+            margin-right: 10px;
+        }
+
+        .stop-period {
+            background: white;
+            border: 2px solid #e17055;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .stop-period-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .period-title {
+            font-weight: bold;
+            color: #e17055;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .remove-btn:hover {
+            background: #c0392b;
+        }
+
+        .add-btn, .save-btn {
+            background: linear-gradient(135deg, #e17055 0%, #f39c12 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .add-btn:hover, .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(225, 112, 85, 0.3);
+        }
+
+        .scenarios-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .scenario-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .scenario-info {
+            flex: 1;
+        }
+
+        .scenario-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .scenario-details {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .scenario-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .apply-btn {
+            background: #27ae60;
+            color: white;
+        }
+
+        .apply-btn:hover {
+            background: #229954;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+
+        .success-message, .error-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .time-input {
+                width: 120px;
+            }
+        }
+    </style>
+    <script defer src="/static/flight_jobs.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-title">
+                <h1>情景分析</h1>
+                <p>模拟不同情况下的航班运行状态</p>
+            </div>
+            <nav class="nav-menu">
+                <a href="/" class="nav-btn">
+                    <i class="fas fa-home"></i>
+                    <span>首页</span>
+                </a>
+                <a href="/timeline" class="nav-btn">
+                    <i class="fas fa-clock"></i>
+                    <span>时间轴</span>
+                </a>
+                <a href="/overview" class="nav-btn">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>概览</span>
+                </a>
+                <a href="/scenario" class="nav-btn active">
+                    <i class="fas fa-bullseye"></i>
+                    <span>情景分析</span>
+                </a>
+                <a href="/flight_input" class="nav-btn">
+                    <i class="fas fa-plane"></i>
+                    <span>AI预测</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="content">
+            <!-- 新建情景设定 -->
+            <div class="section">
+                <div class="section-title">
+                    <span>📝</span>
+                    <span>新建情景设定</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">情景名称</label>
+                    <input type="text" id="scenarioName" class="form-input" placeholder="例如：恶劣天气、设备维护等">
+                </div>
+
+                <!-- 新增：白云机场每小时最大起降容量设置 -->
+                <div class="form-group">
+                    <label class="form-label">白云机场每小时最大起降容量</label>
+                    <input type="number" id="hourlyCapacity" class="form-input" placeholder="例如：60" value="60" min="1" max="200">
+                    <small style="color: #666; font-size: 0.9em;">设置白云机场每小时可处理的最大起降航班数量（包括正常航班和延误重新安排的航班）</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">停止起降时段</label>
+                    <div id="stopPeriods">
+                        <!-- 停止时段将动态添加到这里 -->
+                    </div>
+                    <button class="add-btn" onclick="addStopPeriod()">+ 添加时段</button>
+                </div>
+
+                <div class="form-group">
+                    <button class="save-btn" onclick="saveScenario()">💾 保存情景</button>
+                </div>
+            </div>
+
+            <!-- 已保存的情景 -->
+            <div class="section">
+                <div class="section-title">
+                    <span>📋</span>
+                    <span>已保存的情景</span>
+                </div>
+
+                <div id="scenariosList" class="scenarios-list">
+                    <!-- 情景列表将动态加载到这里 -->
+                </div>
+            </div>
+
+            <!-- 航班优化调度 -->
+            <div class="section">
+                <div class="section-title">
+                    <span>✈️</span>
+                    <span>航班优化调度</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">上传航班数据文件 (CSV格式)</label>
+                    <input type="file" id="optimizationFile" class="form-input" accept=".csv">
+                    <small style="color: #666; font-size: 0.9em;">请上传包含航班数据的CSV文件</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">模拟开始时间</label>
+                    <input type="datetime-local" id="simStartTime" class="form-input" value="2025-05-01T08:00">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">模拟结束时间</label>
+                    <input type="datetime-local" id="simEndTime" class="form-input" value="2025-05-01T10:59">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">容量配置</label>
+                    <small style="color: #666; font-size: 0.9em; margin-bottom: 10px; display: block;">设置每15分钟时间片的最大航班容量</small>
+                    <div style="display: flex; gap: 20px; align-items: center;">
+                        <div>
+                            <label class="form-label" style="margin-bottom: 5px;">起飞容量</label>
+                            <input type="number" id="departureCapacity" class="form-input" value="10" min="1" max="50" style="width: 120px;">
+                            <small style="color: #888; font-size: 0.8em;">每15分钟</small>
+                        </div>
+                        <div>
+                            <label class="form-label" style="margin-bottom: 5px;">降落容量</label>
+                            <input type="number" id="arrivalCapacity" class="form-input" value="8" min="1" max="50" style="width: 120px;">
+                            <small style="color: #888; font-size: 0.8em;">每15分钟</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button class="save-btn" onclick="runOptimization()" id="optimizationBtn">🚀 开始优化调度</button>
+                    <div id="downloadSection" style="display: none; margin-top: 15px;">
+                        <label class="form-label">选择下载文件</label>
+                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                            <select id="downloadFileSelect" class="form-input" style="width: 300px;">
+                                <option value="">请选择要下载的文件</option>
+                                <option value="optimization">航班优化调度结果</option>
+                                <option value="delayed" id="delayedOption" style="display: none;">延误航班列表</option>
+                            </select>
+                            <button class="save-btn" onclick="downloadSelectedFile()" style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);">📥 下载文件</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 优化结果展示区域 -->
+                <div id="optimizationResults" style="display: none; margin-top: 20px;">
+                    <h3 style="color: #333; margin-bottom: 15px;">优化调度结果</h3>
+                    <div id="optimizationTable" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;">
+                        <!-- 结果表格将动态加载到这里 -->
+                    </div>
+                    <div id="optimizationSummary" style="margin-top: 15px; padding: 15px; background: #f0f8ff; border-radius: 8px; border-left: 4px solid #3498db;">
+                        <!-- 优化结果摘要将显示在这里 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let stopPeriodCount = 0;
+
+        // 页面加载时获取已保存的情景
+        document.addEventListener('DOMContentLoaded', function() {
+            loadScenarios();
+            addStopPeriod(); // 默认添加一个时段
+        });
+
+        function addStopPeriod() {
+            stopPeriodCount++;
+            const stopPeriodsContainer = document.getElementById('stopPeriods');
+
+            const periodDiv = document.createElement('div');
+            periodDiv.className = 'stop-period';
+            periodDiv.id = `period-${stopPeriodCount}`;
+
+            periodDiv.innerHTML = `
+                <div class="stop-period-header">
+                    <span class="period-title">停止时段 ${stopPeriodCount}</span>
+                    <button class="remove-btn" onclick="removeStopPeriod(${stopPeriodCount})">删除</button>
+                </div>
+                <div>
+                    <label class="form-label">开始时间：</label>
+                    <input type="time" class="form-input time-input" id="start-${stopPeriodCount}" value="06:00">
+                    <label class="form-label">结束时间：</label>
+                    <input type="time" class="form-input time-input" id="end-${stopPeriodCount}" value="08:00">
+                </div>
+            `;
+
+            stopPeriodsContainer.appendChild(periodDiv);
+        }
+
+        function removeStopPeriod(id) {
+            const periodDiv = document.getElementById(`period-${id}`);
+            if (periodDiv) {
+                periodDiv.remove();
+            }
+        }
+
+        function saveScenario() {
+            const scenarioName = document.getElementById('scenarioName').value.trim();
+            const hourlyCapacity = parseInt(document.getElementById('hourlyCapacity').value) || 60;
+
+            if (!scenarioName) {
+                showError('请输入情景名称');
+                return;
+            }
+
+            if (hourlyCapacity < 1 || hourlyCapacity > 200) {
+                showError('每小时容量必须在1-200之间');
+                return;
+            }
+
+            // 收集所有停止时段
+            const stopPeriods = [];
+            const periodDivs = document.querySelectorAll('.stop-period');
+
+            periodDivs.forEach(div => {
+                const id = div.id.split('-')[1];
+                const startTime = document.getElementById(`start-${id}`).value;
+                const endTime = document.getElementById(`end-${id}`).value;
+
+                if (startTime && endTime) {
+                    stopPeriods.push({
+                        start_time: startTime,
+                        end_time: endTime
+                    });
+                }
+            });
+
+            if (stopPeriods.length === 0) {
+                showError('请至少添加一个停止时段');
+                return;
+            }
+
+            // 发送到后端保存
+            fetch('/api/save-scenario', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    scenario_name: scenarioName,
+                    stop_periods: stopPeriods,
+                    hourly_capacity: hourlyCapacity  // 新增容量参数
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccess(data.message);
+                    // 清空表单
+                    document.getElementById('scenarioName').value = '';
+                    document.getElementById('stopPeriods').innerHTML = '';
+                    stopPeriodCount = 0;
+                    addStopPeriod();
+                    // 重新加载情景列表
+                    loadScenarios();
+                } else {
+                    showError(data.error || '保存失败');
+                }
+            })
+            .catch(error => {
+                showError('保存失败：' + error.message);
+            });
+        }
+
+        function loadScenarios() {
+            fetch('/api/get-scenarios')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayScenarios(data.scenarios);
+                    } else {
+                        showError('加载情景失败');
+                    }
+                })
+                .catch(error => {
+                    showError('加载情景失败：' + error.message);
+                });
+        }
+
+        function displayScenarios(scenarios) {
+            const scenariosList = document.getElementById('scenariosList');
+            scenariosList.innerHTML = '';
+
+            if (scenarios.length === 0) {
+                scenariosList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">暂无保存的情景</p>';
+                return;
+            }
+
+            scenarios.forEach(scenario => {
+                const scenarioDiv = document.createElement('div');
+                scenarioDiv.className = 'scenario-item';
+
+                const periodsText = scenario.stop_periods.map(p => `${p.start_time}-${p.end_time}`).join(', ');
+                const capacity = scenario.hourly_capacity || 60;
+                const info = document.createElement('div');
+                info.className = 'scenario-info';
+                const name = document.createElement('div');
+                name.className = 'scenario-name';
+                name.textContent = scenario.name;
+                const details = document.createElement('div');
+                details.className = 'scenario-details';
+                details.append(
+                    document.createTextNode(`停止时段: ${periodsText}`), document.createElement('br'),
+                    document.createTextNode(`每小时容量: ${capacity} 架次`), document.createElement('br'),
+                    document.createTextNode(`创建时间: ${scenario.created_time}`)
+                );
+                info.append(name, details);
+                const actions = document.createElement('div');
+                actions.className = 'scenario-actions';
+                const applyButton = document.createElement('button');
+                applyButton.className = 'action-btn apply-btn';
+                applyButton.textContent = '应用到时间轴';
+                applyButton.addEventListener('click', () => applyScenario(scenario.name));
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'action-btn delete-btn';
+                deleteButton.textContent = '删除';
+                deleteButton.addEventListener('click', () => deleteScenario(scenario.name));
+                actions.append(applyButton, deleteButton);
+                scenarioDiv.append(info, actions);
+
+                scenariosList.appendChild(scenarioDiv);
+            });
+        }
+
+        function applyScenario(scenarioName) {
+            // 跳转到时间轴页面并应用情景
+            window.location.href = FlightJobs.jobUrl(`/timeline?scenario=${encodeURIComponent(scenarioName)}`);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.textContent = `✅ ${message}`;
+
+            // 移除之前的消息
+            const existingMessages = document.querySelectorAll('.success-message, .error-message');
+            existingMessages.forEach(msg => msg.remove());
+
+            document.querySelector('.content').insertBefore(successDiv, document.querySelector('.content').firstChild);
+
+            // 3秒后自动移除
+            setTimeout(() => {
+                successDiv.remove();
+            }, 3000);
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = `❌ ${message}`;
+
+            // 移除之前的消息
+            const existingMessages = document.querySelectorAll('.success-message, .error-message');
+            existingMessages.forEach(msg => msg.remove());
+
+            document.querySelector('.content').insertBefore(errorDiv, document.querySelector('.content').firstChild);
+
+            // 5秒后自动移除
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        function deleteScenario(scenarioName) {
+            if (!confirm(`确定要删除情景 "${scenarioName}" 吗？此操作不可撤销。`)) {
+                return;
+            }
+
+            fetch('/api/delete-scenario', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    scenario_name: scenarioName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccess(data.message || '情景删除成功');
+                    // 重新加载情景列表
+                    loadScenarios();
+                } else {
+                    showError(data.error || '删除失败');
+                }
+            })
+            .catch(error => {
+                showError('删除失败：' + error.message);
+            });
+        }
+
+        // 航班优化调度相关函数
+        let currentOptimizationFile = null;
+        let currentOptimizationResult = null;
+        let currentDelayedFlightsResult = null;
+
+        function runOptimization() {
+            const fileInput = document.getElementById('optimizationFile');
+            const startTime = document.getElementById('simStartTime').value;
+            const endTime = document.getElementById('simEndTime').value;
+            const departureCapacity = parseInt(document.getElementById('departureCapacity').value) || 10;
+            const arrivalCapacity = parseInt(document.getElementById('arrivalCapacity').value) || 8;
+
+            // 验证输入
+            if (!fileInput.files[0]) {
+                showError('请选择航班数据文件');
+                return;
+            }
+
+            if (!startTime || !endTime) {
+                showError('请设置模拟开始和结束时间');
+                return;
+            }
+
+            if (new Date(startTime) >= new Date(endTime)) {
+                showError('结束时间必须晚于开始时间');
+                return;
+            }
+
+            const optimizationBtn = document.getElementById('optimizationBtn');
+            optimizationBtn.disabled = true;
+            optimizationBtn.innerHTML = '⏳ 正在上传文件...';
+
+            // 首先上传文件
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            fetch('/api/upload-optimization-file', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentOptimizationFile = data.filename;
+                    optimizationBtn.innerHTML = '🚀 正在运行优化...';
+
+                    // 运行优化
+                    return fetch('/api/run-optimization', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            filename: currentOptimizationFile,
+                            start_time: startTime,
+                            end_time: endTime,
+                            departure_capacity: departureCapacity,
+                            arrival_capacity: arrivalCapacity
+                        })
+                    });
+                } else {
+                    throw new Error(data.error || '文件上传失败');
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentOptimizationResult = data.output_filename;
+                    currentDelayedFlightsResult = data.delayed_flights_filename;
+                    showSuccess(data.message || '优化调度完成');
+
+                    // 显示优化统计信息
+                    displayOptimizationSummary(data);
+
+                    // 加载并显示结果
+                    loadOptimizationResult(data.output_filename);
+
+                    // 显示下载区域
+                    const downloadSection = document.getElementById('downloadSection');
+                    downloadSection.style.display = 'block';
+
+                    // 根据是否有延误航班文件来显示/隐藏延误航班选项
+                    const delayedOption = document.getElementById('delayedOption');
+                    if (data.delayed_flights_filename) {
+                        delayedOption.style.display = 'block';
+                    } else {
+                        delayedOption.style.display = 'none';
+                    }
+                } else {
+                    throw new Error(data.error || '优化运行失败');
+                }
+            })
+            .catch(error => {
+                showError('优化失败：' + error.message);
+            })
+            .finally(() => {
+                optimizationBtn.disabled = false;
+                optimizationBtn.innerHTML = '🚀 开始优化调度';
+            });
+        }
+
+        function displayOptimizationSummary(data) {
+            const summaryDiv = document.getElementById('optimizationSummary');
+            const avgDelay = data.delayed_flights > 0 ? (data.total_delay_minutes / data.delayed_flights).toFixed(2) : 0;
+
+            summaryDiv.innerHTML = `
+                <h4 style="margin: 0 0 15px 0; color: #2c3e50;">📊 优化调度统计</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #3498db;">
+                        <div style="font-size: 0.9em; color: #666;">总航班数</div>
+                        <div data-summary="processed" style="font-size: 1.4em; font-weight: bold; color: #2c3e50;"></div>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #e74c3c;">
+                        <div style="font-size: 0.9em; color: #666;">延误航班数</div>
+                        <div data-summary="delayed" style="font-size: 1.4em; font-weight: bold; color: #e74c3c;"></div>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #f39c12;">
+                        <div style="font-size: 0.9em; color: #666;">总延误时间</div>
+                        <div data-summary="total-delay" style="font-size: 1.4em; font-weight: bold; color: #f39c12;"></div>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #9b59b6;">
+                        <div style="font-size: 0.9em; color: #666;">平均延误时间</div>
+                        <div data-summary="average-delay" style="font-size: 1.4em; font-weight: bold; color: #9b59b6;"></div>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; padding: 10px; background: white; border-radius: 6px;">
+                    <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">优化时间段</div>
+                    <div data-summary="period" style="font-weight: bold; color: #2c3e50;"></div>
+                </div>
+                <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 6px;">
+                    <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">容量限制</div>
+                    <div data-summary="capacity" style="font-weight: bold; color: #2c3e50;"></div>
+                </div>
+            `;
+            summaryDiv.querySelector('[data-summary="processed"]').textContent = data.processed_flights;
+            summaryDiv.querySelector('[data-summary="delayed"]').textContent = data.delayed_flights;
+            summaryDiv.querySelector('[data-summary="total-delay"]').textContent = `${data.total_delay_minutes.toFixed(1)} 分钟`;
+            summaryDiv.querySelector('[data-summary="average-delay"]').textContent = `${avgDelay} 分钟`;
+            summaryDiv.querySelector('[data-summary="period"]').textContent = data.optimization_period;
+            summaryDiv.querySelector('[data-summary="capacity"]').textContent =
+                `起飞: ${data.capacity_limits.departure}/15分钟 | 降落: ${data.capacity_limits.arrival}/15分钟`;
+        }
+
+        function loadOptimizationResult(filename) {
+            fetch(`/api/get-optimization-result/${filename}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayOptimizationResult(data.data, data.columns, data.total_rows);
+                    } else {
+                        showError('加载结果失败：' + (data.error || '未知错误'));
+                    }
+                })
+                .catch(error => {
+                    showError('加载结果失败：' + error.message);
+                });
+        }
+
+        function displayOptimizationResult(data, columns, totalRows) {
+            const resultsDiv = document.getElementById('optimizationResults');
+            const tableDiv = document.getElementById('optimizationTable');
+            const summaryDiv = document.getElementById('optimizationSummary');
+
+            const table = document.createElement('table');
+            table.style.cssText = 'width: 100%; border-collapse: collapse; font-size: 0.9em;';
+            const head = document.createElement('thead');
+            const headRow = document.createElement('tr');
+            headRow.style.cssText = 'background: #f8f9fa; position: sticky; top: 0;';
+            columns.forEach(col => {
+                const cell = document.createElement('th');
+                cell.style.cssText = 'padding: 10px; border: 1px solid #ddd; text-align: left; font-weight: bold;';
+                cell.textContent = col;
+                headRow.appendChild(cell);
+            });
+            head.appendChild(headRow);
+            const body = document.createElement('tbody');
+            data.forEach((row, index) => {
+                const bgColor = index % 2 === 0 ? '#ffffff' : '#f8f9fa';
+                const tableRow = document.createElement('tr');
+                tableRow.style.background = bgColor;
+                columns.forEach(col => {
+                    const value = row[col] || '';
+                    const cell = document.createElement('td');
+                    cell.style.cssText = 'padding: 8px; border: 1px solid #ddd;';
+                    cell.textContent = value;
+                    tableRow.appendChild(cell);
+                });
+                body.appendChild(tableRow);
+            });
+            table.append(head, body);
+            tableDiv.replaceChildren(table);
+
+            // 显示表格信息（摘要信息已在displayOptimizationSummary中显示）
+            const tableInfo = document.createElement('div');
+            tableInfo.style.cssText = 'margin-bottom: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 0.9em; color: #666;';
+            tableInfo.textContent = `显示 ${totalRows} 条记录，共 ${columns.length} 列数据`;
+            tableDiv.parentNode.insertBefore(tableInfo, tableDiv);
+
+            // 显示结果区域
+            resultsDiv.style.display = 'block';
+
+            // 滚动到结果区域
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+
+
+        function downloadSelectedFile() {
+            const selectElement = document.getElementById('downloadFileSelect');
+            const selectedValue = selectElement.value;
+
+            if (!selectedValue) {
+                showError('请选择要下载的文件');
+                return;
+            }
+
+            let filename, successMessage;
+
+            if (selectedValue === 'optimization') {
+                if (!currentOptimizationResult) {
+                    showError('没有可下载的优化结果文件');
+                    return;
+                }
+                filename = currentOptimizationResult;
+                successMessage = '优化结果文件下载已开始';
+            } else if (selectedValue === 'delayed') {
+                if (!currentDelayedFlightsResult) {
+                    showError('没有可下载的延误航班列表文件');
+                    return;
+                }
+                filename = currentDelayedFlightsResult;
+                successMessage = '延误航班列表下载已开始';
+            }
+
+            // 创建下载链接
+            const downloadUrl = `/api/download-optimization-result/${filename}`;
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showSuccess(successMessage);
+        }
+
+
+    </script>
+</body>
+</html>

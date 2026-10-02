@@ -1,0 +1,11 @@
+{
+  "worker_address": "127.0.0.1:50052",
+  "gateway_address": "127.0.0.1:50051",
+  "web_host": "127.0.0.1",
+  "web_port": 5000,
+  "rpc_timeout_seconds": 20,
+  "gateway_max_inflight": 4,
+  "worker_max_inflight": 1,
+  "batch_workers": 1,
+  "input_timezone": "Asia/Shanghai"
+}

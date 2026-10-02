@@ -1,0 +1,44 @@
+{
+  "release_manifest_path": "/srv/flight-example/project/runtime/release/candidate.json",
+  "control": {
+    "web_host": "0.0.0.0",
+    "web_port": 6006,
+    "gateway_host": "127.0.0.1",
+    "gateway_port": 50051,
+    "rpc_timeout_ms": 30000
+  },
+  "workers": [
+    {
+      "id": "autodl-a-gpu0",
+      "mode": "local",
+      "gateway_address": "127.0.0.1:50052",
+      "gpu_index": 0,
+      "model_path": "/srv/flight-example/models/Qwen",
+      "adapter_path": "/srv/flight-example/project/runtime/training/adapter",
+      "flow_model_path": "/srv/flight-example/project/runtime/training/flow/flow_model.pkl",
+      "historical_model_path": "/srv/flight-example/project/runtime/training/historical_model.pkl",
+      "feature_contract_path": "/srv/flight-example/project/runtime/training/flow/metrics.json",
+      "capacity": 1,
+      "required": true
+    },
+    {
+      "id": "autodl-b-gpu0",
+      "mode": "ssh",
+      "ssh_host": "connect.example.autodl.com",
+      "ssh_port": 12345,
+      "ssh_user": "root",
+      "ssh_key_file": "/path/to/private-key",
+      "known_hosts_file": "/path/to/known-hosts",
+      "remote_worker_host": "127.0.0.1",
+      "remote_worker_port": 50052,
+      "local_forward_port": 15053,
+      "model_path": "/srv/flight-example/models/Qwen",
+      "adapter_path": "/srv/flight-example/project/runtime/training/adapter",
+      "flow_model_path": "/srv/flight-example/project/runtime/training/flow/flow_model.pkl",
+      "historical_model_path": "/srv/flight-example/project/runtime/training/historical_model.pkl",
+      "feature_contract_path": "/srv/flight-example/project/runtime/training/flow/metrics.json",
+      "capacity": 1,
+      "required": false
+    }
+  ]
+}

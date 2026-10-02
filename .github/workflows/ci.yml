@@ -1,0 +1,46 @@
+name: Public source checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+          cache: pip
+          cache-dependency-path: |
+            requirements-dev.txt
+            requirements-web.txt
+      - name: Install C++ gRPC dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ pkg-config libprotobuf-dev protobuf-compiler libgrpc++-dev protobuf-compiler-grpc
+      - name: Prepare Python and generated protocol
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -r requirements-dev.txt
+          bash scripts/generate_proto.sh
+      - name: Build gateway
+        run: |
+          cmake -S gateway -B build/phase2 -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/phase2 -j2
+          ln -s phase2 build/phase2-release
+      - name: Run C++ and Python checks
+        run: |
+          ctest --test-dir build/phase2 --output-on-failure
+          .venv/bin/pytest -q
+      - name: Audit public files
+        run: .venv/bin/python -m scripts.release_audit --root . --output /tmp/flight-release-audit.json

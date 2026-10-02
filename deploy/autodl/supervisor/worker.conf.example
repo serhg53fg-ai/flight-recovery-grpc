@@ -1,0 +1,12 @@
+[program:flight-worker-gpu0]
+directory=%(ENV_FLIGHT_PROJECT_ROOT)s
+command=%(ENV_FLIGHT_PROJECT_ROOT)s/.venv/bin/python -m deploy.autodl.worker --listen 127.0.0.1:50052 --worker-id autodl-b-gpu0 --backend qwen --model-path /srv/flight-example/models/Qwen --gpu-index 0 --capacity 1 --output-mode duration_components
+autostart=true
+autorestart=unexpected
+startsecs=30
+startretries=5
+stopsignal=TERM
+stopasgroup=true
+killasgroup=true
+stdout_logfile=%(ENV_FLIGHT_PROJECT_ROOT)s/runtime/autodl/logs/supervisor-worker.log
+stderr_logfile=%(ENV_FLIGHT_PROJECT_ROOT)s/runtime/autodl/logs/supervisor-worker-error.log

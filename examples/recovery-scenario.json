@@ -1,0 +1,10 @@
+{
+  "airport": "ZGGG",
+  "horizon_start": "2030-01-15T08:00:00+08:00",
+  "horizon_end": "2030-01-15T20:00:00+08:00",
+  "slot_minutes": 15,
+  "departure_capacity": 1,
+  "arrival_capacity": 1,
+  "mtt_minutes": 30,
+  "closures": []
+}

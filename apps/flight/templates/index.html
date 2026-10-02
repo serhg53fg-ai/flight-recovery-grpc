@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>航班预测系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header-title h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-title p {
+            margin: 0;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            min-width: 80px;
+            text-align: center;
+            gap: 5px;
+        }
+
+        .nav-btn i {
+            font-size: 1.2em;
+        }
+
+        .nav-btn span {
+            font-size: 0.9em;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .upload-section {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .upload-area {
+            border: 3px dashed #4facfe;
+            border-radius: 10px;
+            padding: 40px;
+            margin: 20px 0;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #00f2fe;
+            background: #f0f7ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #00f2fe;
+            background: #e6f3ff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: #4facfe;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4facfe;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            display: none;
+            padding: 40px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .results-title {
+            font-size: 1.8em;
+            color: #333;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(86, 171, 47, 0.3);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s ease;
+        }
+
+        tr:hover td {
+            background-color: #f8f9ff;
+        }
+
+        .delay-positive {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .delay-negative {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .error-message {
+            background: #ffe6e6;
+            color: #d63031;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #d63031;
+        }
+
+        .success-message {
+            background: #e8f5e8;
+            color: #00b894;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #00b894;
+        }
+
+        .file-info {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #4facfe;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .upload-section {
+                padding: 20px;
+            }
+
+            .results-section {
+                padding: 20px;
+            }
+
+            .results-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            th, td {
+                padding: 8px 5px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+    <script defer src="/static/flight_jobs.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-title">
+                <h1>航班预测系统</h1>
+                <p>基于机器学习的航班延误预测与分析</p>
+            </div>
+            <nav class="nav-menu">
+                <a href="/" class="nav-btn active">
+                    <i class="fas fa-home"></i>
+                    <span>首页</span>
+                </a>
+                <a href="/timeline" class="nav-btn">
+                    <i class="fas fa-clock"></i>
+                    <span>时间轴</span>
+                </a>
+                <a href="/overview" class="nav-btn">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>概览</span>
+                </a>
+                <a href="/scenario" class="nav-btn">
+                    <i class="fas fa-bullseye"></i>
+                    <span>情景分析</span>
+                </a>
+                <a href="/flight_input" class="nav-btn">
+                    <i class="fas fa-plane"></i>
+                    <span>AI预测</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="upload-section" id="uploadSection">
+            <h2>上传航班数据</h2>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">拖拽Excel文件到此处，或点击选择文件</div>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">选择文件</button>
+                <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls">
+            </div>
+            <div class="file-info" id="fileInfo" style="display: none;"></div>
+        </div>
+
+        <div class="loading" id="loadingSection">
+            <div class="spinner"></div>
+            <h3>正在分析数据并进行预测...</h3>
+            <p>请稍候，这可能需要几分钟时间</p>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <h2 class="results-title">预测结果</h2>
+                <div>
+                    <input type="text" id="flightSearchInput" placeholder="输入航班号搜索..." style="padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    <button onclick="searchFlight()" style="padding: 8px 15px; background: #4facfe; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 5px;">🔍 搜索</button>
+                    <button onclick="clearSearch()" style="padding: 8px 15px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;">清除</button>
+                    <a href="#" id="downloadBtn" class="download-btn">📥 下载结果</a>
+                    <a href="/timeline" style="margin-left: 10px; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px;">📊 查看时间轴</a>
+                    <a href="/scenario" style="margin-left: 10px; padding: 10px 20px; background: #ffc107; color: black; text-decoration: none; border-radius: 5px;">⚙️ 情景设定</a>
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>机尾号</th>
+                            <th>航班号</th>
+                            <th>机型</th>
+                            <th>起飞站</th>
+                            <th>到达站</th>
+                            <th>计划离港时间</th>
+                            <th>计划到港时间</th>
+                            <th>预测实际离港时间</th>
+                            <th>预测实际到港时间</th>
+                            <th>预测离港延误(分钟)</th>
+                            <th>预测到港延误(分钟)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadSection = document.getElementById('uploadSection');
+        const loadingSection = document.getElementById('loadingSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const fileInfo = document.getElementById('fileInfo');
+        const resultsBody = document.getElementById('resultsBody');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // 拖拽上传功能
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // 文件选择
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            // 验证文件类型
+            const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                'application/vnd.ms-excel'];
+            if (!allowedTypes.includes(file.type)) {
+                showError('请选择Excel文件（.xlsx或.xls格式）');
+                return;
+            }
+
+            // 验证文件大小（16MB限制）
+            if (file.size > 16 * 1024 * 1024) {
+                showError('文件大小不能超过16MB');
+                return;
+            }
+
+            // 显示文件信息
+            fileInfo.textContent = `已选择文件：${file.name} ｜ 文件大小：${(file.size / 1024 / 1024).toFixed(2)} MB ｜ 文件类型：${file.type}`;
+            fileInfo.style.display = 'block';
+
+            // 上传文件
+            uploadFile(file);
+        }
+
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // 显示加载状态
+            uploadSection.style.display = 'none';
+            loadingSection.style.display = 'block';
+            resultsSection.style.display = 'none';
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingSection.style.display = 'none';
+
+                if (data.success) {
+                    displayResults(data.predictions);
+
+                    // 安全检查downloadBtn是否存在
+                    if (downloadBtn) {
+                        downloadBtn.href = `/download/${data.result_file}`;
+                    }
+
+                    resultsSection.style.display = 'block';
+                    showSuccess(`预测完成！共处理 ${data.predictions.length} 条航班数据`);
+                } else {
+                    uploadSection.style.display = 'block';
+                    showError(data.error || '预测失败');
+                }
+            })
+            .catch(error => {
+                loadingSection.style.display = 'none';
+                uploadSection.style.display = 'block';
+                showError('网络错误：' + error.message);
+            });
+        }
+
+        function displayResults(predictions) {
+            resultsBody.innerHTML = '';
+
+            predictions.forEach(prediction => {
+                const row = document.createElement('tr');
+
+                // 格式化延误时间显示
+                const formatDelay = (delay) => {
+                    if (delay === 'N/A' || delay === null) return 'N/A';
+                    const delayNum = parseFloat(delay);
+                    if (delayNum > 0) {
+                        return `+${delayNum}`;
+                    } else if (delayNum < 0) {
+                        return String(delayNum);
+                    } else {
+                        return '0';
+                    }
+                };
+
+                // 格式化时间显示
+                // 格式化时间显示
+                const formatTime = (timeStr) => {
+                    if (!timeStr || timeStr === 'N/A') return 'N/A';
+                    // 直接返回服务器传来的时间字符串，不进行Date对象转换
+                    return timeStr;
+                };
+
+                const values = [
+                    prediction['机尾号'] || 'N/A', prediction['航班号'] || 'N/A',
+                    prediction['机型'] || 'N/A', prediction['起飞站四字码'] || 'N/A',
+                    prediction['到达站四字码'] || 'N/A', formatTime(prediction['计划离港时间']),
+                    formatTime(prediction['计划到港时间']), formatTime(prediction['预测实际离港时间']),
+                    formatTime(prediction['预测实际到港时间']),
+                    formatDelay(prediction['预测离港延误(分钟)']),
+                    formatDelay(prediction['预测到港延误(分钟)'])
+                ];
+                values.forEach(value => {
+                    const cell = document.createElement('td');
+                    cell.textContent = String(value);
+                    row.appendChild(cell);
+                });
+
+                resultsBody.appendChild(row);
+            });
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = `❌ ${message}`;
+
+            // 移除之前的消息
+            const existingMessages = document.querySelectorAll('.error-message, .success-message');
+            existingMessages.forEach(msg => msg.remove());
+
+            uploadSection.appendChild(errorDiv);
+
+            // 3秒后自动移除
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.textContent = `✅ ${message}`;
+
+            // 移除之前的消息
+            const existingMessages = document.querySelectorAll('.error-message, .success-message');
+            existingMessages.forEach(msg => msg.remove());
+
+            resultsSection.insertBefore(successDiv, resultsSection.firstChild);
+
+            // 5秒后自动移除
+            setTimeout(() => {
+                successDiv.remove();
+            }, 5000);
+        }
+
+        // 重新上传功能（保留带确认对话框的版本）
+        function resetUpload() {
+            if (confirm('确定要重新上传新的数据文件吗？这将替换当前的预测结果。')) {
+                uploadSection.style.display = 'block';
+                loadingSection.style.display = 'none';
+                resultsSection.style.display = 'none';
+                fileInfo.style.display = 'none';
+                fileInput.value = '';
+
+                // 清除之前的消息
+                const existingMessages = document.querySelectorAll('.error-message, .success-message');
+                existingMessages.forEach(msg => msg.remove());
+            }
+        }
+
+        // 航班搜索功能
+        function searchFlight() {
+            const searchInput = document.getElementById('flightSearchInput');
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            const tableRows = document.querySelectorAll('#resultsBody tr');
+
+            if (!searchTerm) {
+                // 如果搜索框为空，显示所有行
+                tableRows.forEach(row => {
+                    row.style.display = '';
+                });
+                return;
+            }
+
+            // 遍历所有表格行进行搜索
+            tableRows.forEach(row => {
+                const flightNumber = row.cells[1].textContent.toLowerCase(); // 航班号列
+                const tailNumber = row.cells[0].textContent.toLowerCase();   // 机尾号列
+                const departure = row.cells[3].textContent.toLowerCase();    // 起飞站列
+                const arrival = row.cells[4].textContent.toLowerCase();      // 到达站列
+
+                // 检查是否匹配搜索条件
+                if (flightNumber.includes(searchTerm) ||
+                    tailNumber.includes(searchTerm) ||
+                    departure.includes(searchTerm) ||
+                    arrival.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // 清除搜索功能
+        function clearSearch() {
+            const searchInput = document.getElementById('flightSearchInput');
+            searchInput.value = '';
+
+            // 显示所有表格行
+            const tableRows = document.querySelectorAll('#resultsBody tr');
+            tableRows.forEach(row => {
+                row.style.display = '';
+            });
+        }
+
+        // 检查是否有已存在的预测结果
+        function checkExistingResults() {
+            fetch('/api/latest-results')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success && data.predictions && data.predictions.length > 0) {
+                        // 如果有预测结果，直接显示
+                        displayResults(data.predictions);
+
+                        // 安全检查downloadBtn是否存在
+                        if (downloadBtn) {
+                            downloadBtn.href = `/download/${data.result_file}`;
+                        }
+
+                        // 隐藏上传区域和加载区域，显示结果区域
+                        uploadSection.style.display = 'none';
+                        loadingSection.style.display = 'none';
+                        resultsSection.style.display = 'block';
+
+                        // 显示加载成功消息
+                        showSuccess(`已加载最新预测结果！共 ${data.predictions.length} 条航班数据 (${data.file_time})`);
+                    } else {
+                        // 没有预测结果，显示上传区域
+                        uploadSection.style.display = 'block';
+                        loadingSection.style.display = 'none';
+                        resultsSection.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    // 出错时显示上传区域
+                    console.log('检查已有结果时出错:', error);
+                    uploadSection.style.display = 'block';
+                    loadingSection.style.display = 'none';
+                    resultsSection.style.display = 'none';
+                });
+        }
+
+        // 页面初始化（单一事件监听器）
+        document.addEventListener('DOMContentLoaded', () => {
+            // 页面加载时检查是否有已存在的预测结果
+            checkExistingResults();
+
+            // 为搜索输入框添加回车键支持
+            const searchInput = document.getElementById('flightSearchInput');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        searchFlight();
+                    }
+                });
+            }
+
+            // 添加重新上传按钮到结果页面（只创建一次）
+            const resetBtn = document.createElement('button');
+            resetBtn.className = 'upload-btn';
+            resetBtn.innerHTML = '🔄 重新上传';
+            resetBtn.onclick = resetUpload;
+            resetBtn.style.marginLeft = '10px';
+
+            const resultsHeader = document.querySelector('.results-header div');
+            if (resultsHeader) {
+                resultsHeader.appendChild(resetBtn);
+            }
+        });
+
+        // ... existing code ...
+    </script>
+</body>
+</html>

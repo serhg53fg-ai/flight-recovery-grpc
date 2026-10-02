@@ -1,0 +1,7 @@
+-r requirements-web.txt
+grpcio-tools==1.62.3
+grpcio-health-checking==1.62.3
+pytest==8.3.5
+supervisor==4.3.0
+h5py==3.11.0
+playwright==1.51.0

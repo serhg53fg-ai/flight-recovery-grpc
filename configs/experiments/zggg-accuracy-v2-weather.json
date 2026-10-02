@@ -1,0 +1,59 @@
+{
+  "experiment_id": "zggg-accuracy-v2-weather",
+  "dataset_id": "example-dataset",
+  "dataset_dir": "/path/to/dataset",
+  "dataset_manifest_hash": "REPLACE_WITH_YOUR_DATASET_MANIFEST_HASH",
+  "source_sha256": "REPLACE_WITH_YOUR_SOURCE_SHA256",
+  "weather_archive_sha256": "REPLACE_WITH_YOUR_WEATHER_ARCHIVE_SHA256",
+  "development_split": "train",
+  "locked_splits": [
+    "validation",
+    "test"
+  ],
+  "timezone": "Asia/Shanghai",
+  "folds": {
+    "initial_train_dates": 9,
+    "validation_dates": 3,
+    "step_dates": 3
+  },
+  "targets": [
+    "off_block_delay_min",
+    "taxi_out_min",
+    "airborne_min",
+    "taxi_in_min",
+    "takeoff_15m",
+    "takeoff_30m",
+    "takeoff_60m",
+    "landing_15m",
+    "landing_30m",
+    "landing_60m",
+    "total_15m",
+    "total_30m",
+    "total_60m"
+  ],
+  "candidates": [
+    "historical_median",
+    "plain_gradient_boosting",
+    "weather_gradient_boosting"
+  ],
+  "feature_policy": "prediction_cutoff_or_earlier; METAR_current_observation_excludes_BECMG_TEMPO; TSRA_precipitation; issue_time_assumed_if_receipt_missing",
+  "preprocessing": "fit_each_training_fold_only; no_validation_or_test_statistics",
+  "model_parameters": "existing_baselines_defaults_frozen_for_first_round",
+  "random_seed": 42,
+  "metrics": [
+    "MAE",
+    "median_absolute_error",
+    "P90_absolute_error",
+    "time_order_rate",
+    "horizon_MAE"
+  ],
+  "selection_rule": "posthoc_parser_correction_exploration; compare_train_split_expanding_folds; never_use_locked_splits_for_tuning",
+  "limitations": [
+    "May 2025 only",
+    "schedule revision times unavailable",
+    "event receipt times unavailable",
+    "METAR receipt times unavailable",
+    "TAF and external-airport weather absent"
+  ],
+  "weather_feature_version": "aviation-weather-v2"
+}

@@ -1,0 +1,160 @@
+syntax = "proto3";
+package flight.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+message FlightFeatures {
+  string flight_id = 1;
+  string flight_number = 2;
+  string tail_number = 3;
+  string aircraft_type = 4;
+  string departure_airport = 5;
+  string arrival_airport = 6;
+  google.protobuf.Timestamp planned_off_block = 7;
+  google.protobuf.Timestamp planned_on_block = 8;
+  string departure_metar = 9;
+  string arrival_metar = 10;
+  optional double planned_distance_miles = 11;
+  optional double planned_flight_minutes = 12;
+  optional int32 planned_takeoff_count = 13;
+  optional int32 planned_landing_count = 14;
+  optional int32 planned_total_flow = 15;
+  optional string flight_nature = 16;
+}
+message PredictRequest {
+  string trace_id = 1;
+  FlightFeatures flight = 2;
+  ZgggPredictionContext zggg_context = 3;
+}
+
+message WeatherFeatures {
+  optional double wind_direction_deg = 1;
+  optional double wind_speed_kt = 2;
+  optional double wind_gust_kt = 3;
+  optional double visibility_m = 4;
+  optional double ceiling_ft = 5;
+  optional double temperature_c = 6;
+  optional double dewpoint_c = 7;
+  optional double pressure_hpa = 8;
+  optional bool precipitation = 9;
+  optional bool thunderstorm = 10;
+  optional bool cumulonimbus = 11;
+  optional bool cavok = 12;
+}
+
+message WeatherSnapshot {
+  string kind = 1;
+  string airport = 2;
+  google.protobuf.Timestamp issue_time = 3;
+  google.protobuf.Timestamp valid_from = 4;
+  google.protobuf.Timestamp valid_to = 5;
+  bool missing = 6;
+  bool stale = 7;
+  optional double report_age_minutes = 8;
+  WeatherFeatures features = 9;
+  string source = 10;
+}
+
+message AirportWeather {
+  WeatherSnapshot metar = 1;
+  WeatherSnapshot taf = 2;
+}
+
+message FlowFeatureWindow {
+  uint32 horizon_minutes = 1;
+  int32 planned_takeoff = 2;
+  int32 planned_landing = 3;
+  int32 completed_takeoff = 4;
+  int32 completed_landing = 5;
+}
+
+message ZgggPredictionContext {
+  google.protobuf.Timestamp prediction_cutoff = 1;
+  AirportWeather departure_weather = 2;
+  AirportWeather arrival_weather = 3;
+  repeated FlowFeatureWindow flow_features = 4;
+  string data_version = 5;
+}
+enum PredictionSource {
+  SOURCE_UNSPECIFIED = 0;
+  LLM = 1;
+  TEST = 2;
+  BASELINE = 3;
+}
+message Prediction {
+  google.protobuf.Timestamp off_block = 1;
+  google.protobuf.Timestamp takeoff = 2;
+  google.protobuf.Timestamp landing = 3;
+  google.protobuf.Timestamp on_block = 4;
+}
+
+message AirportFlowWindow {
+  uint32 horizon_minutes = 1;
+  int32 takeoff = 2;
+  int32 landing = 3;
+  int32 total = 4;
+}
+
+message AirportFlowPrediction {
+  repeated AirportFlowWindow windows = 1;
+  string model_version = 2;
+}
+
+message PredictResponse {
+  string trace_id = 1;
+  Prediction prediction = 2;
+  PredictionSource source = 3;
+  string model_version = 4;
+  string worker_id = 5;
+  int64 inference_ms = 6;
+  int64 gateway_ms = 7;
+  AirportFlowPrediction airport_flow = 8;
+  bool weather_stale = 9;
+  bool flow_degraded = 10;
+  string data_version = 11;
+  string prompt_version = 12;
+  bool flight_degraded = 13;
+  string flight_fallback_reason = 14;
+  string flow_fallback_reason = 15;
+}
+
+enum CircuitState {
+  CIRCUIT_STATE_UNSPECIFIED = 0;
+  CLOSED = 1;
+  OPEN = 2;
+  HALF_OPEN = 3;
+}
+
+message NodeStatus {
+  string id = 1;
+  string address = 2;
+  bool enabled = 3;
+  bool healthy = 4;
+  CircuitState circuit_state = 5;
+  uint32 inflight = 6;
+  uint32 capacity = 7;
+  string last_error = 8;
+  google.protobuf.Timestamp last_health_time = 9;
+  uint64 selected_count = 10;
+  uint64 success_count = 11;
+  map<string, uint64> failure_counts = 12;
+  uint64 failover_count = 13;
+  uint64 total_latency_ms = 14;
+}
+
+message ClusterStatus {
+  bool serving = 1;
+  google.protobuf.Timestamp generated_at = 2;
+  repeated NodeStatus nodes = 3;
+}
+
+service PredictionGateway {
+  rpc Predict(PredictRequest) returns (PredictResponse);
+}
+service InferenceWorker {
+  rpc Predict(PredictRequest) returns (PredictResponse);
+}
+service GatewayAdmin {
+  rpc GetClusterStatus(google.protobuf.Empty) returns (ClusterStatus);
+}

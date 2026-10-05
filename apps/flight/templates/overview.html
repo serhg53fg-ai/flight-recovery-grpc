@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>航班总览 - 航班预测系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header-title h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-title p {
+            margin: 0;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            min-width: 80px;
+            text-align: center;
+            gap: 5px;
+        }
+
+        .nav-btn i {
+            font-size: 1.2em;
+        }
+
+        .nav-btn span {
+            font-size: 0.9em;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .controls {
+            background: #f8f9ff;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .flight-type-toggle {
+            display: flex;
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .toggle-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .content {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+
+
+        .timeline {
+            display: grid;
+            grid-template-columns: repeat(24, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            min-width: 100%;
+            padding-bottom: 10px;
+        }
+
+
+
+        .hour-detail {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .detail-title {
+            font-size: 1.3em;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .close-detail {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .flights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .flight-card {
+            background: #f8f9ff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .flight-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .flight-number {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .flight-time {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #e74c3c;
+            background: #ffeaea;
+            border-radius: 10px;
+            margin: 20px;
+        }
+
+        /* 总览图表样式 */
+        .overview-chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            flex: 1;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .chart-title {
+            font-size: 1.5em;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .zoom-btn, .reset-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .zoom-btn:hover, .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            overflow-x: auto;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafafa;
+            padding: 10px;
+            flex: 1;
+            min-height: 500px;
+        }
+
+        .timeline {
+            display: flex;
+            gap: 3px;
+            padding: 10px 0;
+            min-width: 100%;
+            justify-content: space-between;
+        }
+
+        .timeline-hour-block {
+            flex: 1;
+            min-width: 60px;
+            max-width: 90px;
+            background: #f8f9ff;
+            border-radius: 6px;
+            padding: 6px 3px;
+            border-left: 3px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .timeline-hour-block.zoomed {
+            flex: none;
+        }
+
+        .timeline-hour-block:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .timeline-hour-title {
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .timeline-flight-count {
+            background: #667eea;
+            color: white;
+            border-radius: 10px;
+            padding: 3px 6px;
+            font-size: 0.7em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .timeline-flights-container {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .timeline-flight-item {
+            background: white;
+            margin: 1px 0;
+            padding: 3px;
+            border-radius: 2px;
+            border-left: 2px solid #667eea;
+            font-size: 0.65em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .timeline-flight-item:hover {
+            background: #f0f0ff;
+            transform: translateX(2px);
+        }
+
+        .timeline-flight-number {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1px;
+            font-size: 0.7em;
+        }
+
+        .timeline-flight-time {
+            color: #667eea;
+            font-size: 0.6em;
+        }
+    </style>
+    <script defer src="/static/flight_jobs.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-title">
+                <h1>航班预测概览</h1>
+                <p>全面展示航班预测结果和统计分析</p>
+            </div>
+            <nav class="nav-menu">
+                <a href="/" class="nav-btn">
+                    <i class="fas fa-home"></i>
+                    <span>首页</span>
+                </a>
+                <a href="/timeline" class="nav-btn">
+                    <i class="fas fa-clock"></i>
+                    <span>时间轴</span>
+                </a>
+                <a href="/overview" class="nav-btn active">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>概览</span>
+                </a>
+                <a href="/scenario" class="nav-btn">
+                    <i class="fas fa-bullseye"></i>
+                    <span>情景分析</span>
+                </a>
+                <a href="/flight_input" class="nav-btn">
+                    <i class="fas fa-plane"></i>
+                    <span>AI预测</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="controls">
+            <div class="flight-type-toggle">
+                <button class="toggle-btn active" data-type="departure">✈️ 出港航班</button>
+                <button class="toggle-btn" data-type="arrival">🛬 入港航班</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- 总览图表区域 -->
+            <div class="overview-chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">📊 24小时航班总览图</div>
+                    <div class="chart-controls">
+                        <button class="zoom-btn" onclick="zoomChart(-0.1)">🔍 缩小</button>
+                        <button class="zoom-btn" onclick="zoomChart(0.1)">🔍 放大</button>
+                        <button class="reset-btn" onclick="resetZoom()">🔄 重置</button>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <div class="timeline" id="overviewTimeline">
+                        <!-- 时间轴内容将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div id="hourDetail" class="hour-detail" style="display: none;">
+                <div class="detail-header">
+                    <div class="detail-title">详细航班信息</div>
+                    <button class="close-detail" onclick="closeDetail()">关闭</button>
+                </div>
+                <div id="detailContent" class="flights-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFlightType = 'departure';
+        let flightData = null;
+        let chartData = null;
+
+        // 页面加载时获取数据
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFlightData();
+
+            // 绑定切换按钮事件
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFlightType = this.dataset.type;
+                    renderOverviewChart();
+                });
+            });
+        });
+
+        // 加载航班数据
+        async function loadFlightData() {
+            try {
+                const response = await fetch('/api/flight-data');
+                if (!response.ok) {
+                    throw new Error('无法获取航班数据');
+                }
+                flightData = await response.json();
+                renderOverviewChart();
+            } catch (error) {
+                console.error('加载失败:', error.message);
+            }
+        }
+
+
+
+        // 按小时分组航班数据
+        function groupFlightsByHour() {
+            if (!flightData || !flightData.flights) return {};
+
+            const hourlyData = {};
+
+            flightData.flights.forEach(flight => {
+                let timeField, flightNumber;
+
+                if (currentFlightType === 'departure') {
+                    timeField = flight['计划离港时间'] || flight['实际离港时间'];
+                    flightNumber = flight['航班号'] || 'N/A';
+                } else {
+                    timeField = flight['计划到港时间'] || flight['实际到港时间'];
+                    flightNumber = flight['航班号'] || 'N/A';
+                }
+
+                if (timeField) {
+                    const hour = extractHour(timeField);
+                    if (hour !== null) {
+                        if (!hourlyData[hour]) hourlyData[hour] = [];
+                        hourlyData[hour].push({
+                            flightNumber: flightNumber,
+                            time: timeField,
+                            fullData: flight
+                        });
+                    }
+                }
+            });
+
+            return hourlyData;
+        }
+
+        // 提取小时
+        function extractHour(timeStr) {
+            if (!timeStr) return null;
+
+            // 尝试多种时间格式
+            const timeFormats = [
+                /^(\d{1,2}):(\d{2})/, // HH:MM
+                /^(\d{4})-(\d{2})-(\d{2})\s+(\d{1,2}):(\d{2})/, // YYYY-MM-DD HH:MM
+                /^(\d{1,2}):(\d{2}):(\d{2})/ // HH:MM:SS
+            ];
+
+            for (let format of timeFormats) {
+                const match = timeStr.toString().match(format);
+                if (match) {
+                    const hour = format === timeFormats[1] ? parseInt(match[4]) : parseInt(match[1]);
+                    return hour >= 0 && hour <= 23 ? hour : null;
+                }
+            }
+
+            return null;
+        }
+
+        // 显示小时详情
+        function showHourDetail(hour) {
+            const hourlyData = groupFlightsByHour();
+            const hourData = hourlyData[hour] || [];
+
+            const hourStr = hour.toString().padStart(2, '0');
+            const detailTitle = document.querySelector('.detail-title');
+            const detailContent = document.getElementById('detailContent');
+            const hourDetail = document.getElementById('hourDetail');
+
+            detailTitle.textContent = `${hourStr}:00 - ${hourStr}:59 (${hourData.length} 架次)`;
+
+            let detailHTML = '';
+            if (hourData.length === 0) {
+                detailHTML = '<div style="text-align: center; color: #999; padding: 20px;">该时段无航班</div>';
+                detailContent.innerHTML = detailHTML;
+            } else {
+                detailContent.replaceChildren();
+                hourData.forEach(flight => {
+                    const card = document.createElement('div');
+                    card.className = 'flight-card';
+                    card.addEventListener('click', () => goToTimeline(flight.flightNumber));
+                    const number = document.createElement('div');
+                    number.className = 'flight-number';
+                    number.textContent = flight.flightNumber;
+                    const time = document.createElement('div');
+                    time.className = 'flight-time';
+                    time.textContent = `${currentFlightType === 'departure' ? '离港' : '到港'}: ${flight.time}`;
+                    card.append(number, time);
+                    detailContent.appendChild(card);
+                });
+            }
+            hourDetail.style.display = 'block';
+            hourDetail.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 关闭详情
+        function closeDetail() {
+            document.getElementById('hourDetail').style.display = 'none';
+        }
+
+        // 跳转到时间轴页面
+        function goToTimeline(flightNumber) {
+            window.location.href = FlightJobs.jobUrl(`/timeline?flight=${encodeURIComponent(flightNumber)}`);
+        }
+
+        // 渲染总览图表
+        function renderOverviewChart() {
+            if (!flightData) return;
+
+            const timelineContainer = document.getElementById('overviewTimeline');
+            timelineContainer.innerHTML = '';
+
+            // 获取小时数据
+            const hourlyData = groupFlightsByHour();
+
+            // 生成24小时的时间轴
+            for (let hour = 0; hour < 24; hour++) {
+                const hourData = hourlyData[hour] || [];
+                const hourStr = hour.toString().padStart(2, '0');
+
+                const hourBlock = document.createElement('div');
+                hourBlock.className = 'timeline-hour-block';
+                hourBlock.onclick = () => showHourDetail(hour);
+
+                // 小时标题
+                const hourTitle = document.createElement('div');
+                hourTitle.className = 'timeline-hour-title';
+                hourTitle.textContent = `${hourStr}:00`;
+                hourBlock.appendChild(hourTitle);
+
+                // 航班数量
+                const flightCount = document.createElement('div');
+                flightCount.className = 'timeline-flight-count';
+                flightCount.textContent = `${hourData.length} 架次`;
+                hourBlock.appendChild(flightCount);
+
+                // 航班列表容器
+                const flightsContainer = document.createElement('div');
+                flightsContainer.className = 'timeline-flights-container';
+
+                // 显示航班号
+                hourData.forEach(flight => {
+                    const flightItem = document.createElement('div');
+                    flightItem.className = 'timeline-flight-item';
+
+                    const flightNumber = document.createElement('div');
+                    flightNumber.className = 'timeline-flight-number';
+                    flightNumber.textContent = flight.flightNumber;
+                    flightItem.appendChild(flightNumber);
+
+                    const flightTime = document.createElement('div');
+                    flightTime.className = 'timeline-flight-time';
+                    flightTime.textContent = formatTimeOnly(flight.time);
+                    flightItem.appendChild(flightTime);
+
+                    flightsContainer.appendChild(flightItem);
+                });
+
+                hourBlock.appendChild(flightsContainer);
+                timelineContainer.appendChild(hourBlock);
+            }
+        }
+
+        // 格式化时间，只显示小时和分钟
+        function formatTimeOnly(timeStr) {
+            if (!timeStr) return '';
+
+            // 尝试匹配各种时间格式
+            const timeFormats = [
+                /^(\d{1,2}):(\d{2})/, // HH:MM
+                /^\d{4}-\d{2}-\d{2}\s+(\d{1,2}):(\d{2})/, // YYYY-MM-DD HH:MM
+                /^(\d{1,2}):(\d{2}):(\d{2})/ // HH:MM:SS
+            ];
+
+            for (let format of timeFormats) {
+                const match = timeStr.toString().match(format);
+                if (match) {
+                    if (format === timeFormats[1]) {
+                        return `${match[1].padStart(2, '0')}:${match[2]}`;
+                    } else {
+                        return `${match[1].padStart(2, '0')}:${match[2]}`;
+                    }
+                }
+            }
+
+            return timeStr.toString().substring(0, 5);
+        }
+
+        // 缩放功能（现在用于调整时间轴块的大小）
+        function zoomChart(delta) {
+            const timeline = document.getElementById('overviewTimeline');
+            const hourBlocks = timeline.querySelectorAll('.timeline-hour-block');
+
+            hourBlocks.forEach(block => {
+                const currentWidth = parseInt(getComputedStyle(block).minWidth) || 60;
+                let newWidth;
+
+                if (delta > 0) {
+                    // 放大：增加宽度，并设置为固定宽度
+                    newWidth = Math.min(200, currentWidth + 30);
+                    block.style.minWidth = newWidth + 'px';
+                    block.style.maxWidth = newWidth + 'px';
+                    block.classList.add('zoomed');
+                } else {
+                    // 缩小：减少宽度
+                    newWidth = Math.max(40, currentWidth - 30);
+                    block.style.minWidth = newWidth + 'px';
+                    block.style.maxWidth = newWidth + 'px';
+                    if (newWidth <= 60) {
+                        block.classList.remove('zoomed');
+                    } else {
+                        block.classList.add('zoomed');
+                    }
+                }
+            });
+        }
+
+        // 重置缩放
+        function resetZoom() {
+            const timeline = document.getElementById('overviewTimeline');
+            const hourBlocks = timeline.querySelectorAll('.timeline-hour-block');
+
+            hourBlocks.forEach(block => {
+                // 恢复到原始的flex布局，24小时一屏显示
+                block.style.minWidth = '';
+                block.style.maxWidth = '';
+                block.classList.remove('zoomed');
+            });
+        }
+
+    </script>
+</body>
+</html>

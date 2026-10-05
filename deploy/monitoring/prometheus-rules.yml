@@ -1,0 +1,58 @@
+{
+  "groups": [
+    {
+      "name": "flight-resident",
+      "rules": [
+        {
+          "alert": "FlightMetricsTargetDown",
+          "expr": "up{job=\"flight-resident\"} == 0",
+          "for": "1m",
+          "labels": {"severity": "critical"},
+          "annotations": {"summary": "Flight Resident metrics target is unavailable"}
+        },
+        {
+          "alert": "FlightGatewayNotServing",
+          "expr": "flight_gateway_serving != 1",
+          "for": "1m",
+          "labels": {"severity": "critical"},
+          "annotations": {"summary": "Flight gRPC Gateway is not serving"}
+        },
+        {
+          "alert": "FlightWorkerUnhealthy",
+          "expr": "flight_gateway_worker_healthy != 1",
+          "for": "1m",
+          "labels": {"severity": "critical"},
+          "annotations": {"summary": "Flight inference Worker is unhealthy"}
+        },
+        {
+          "alert": "FlightWorkerCircuitNotClosed",
+          "expr": "flight_gateway_worker_circuit_state != 1",
+          "for": "1m",
+          "labels": {"severity": "warning"},
+          "annotations": {"summary": "Flight Worker circuit breaker is not closed"}
+        },
+        {
+          "alert": "FlightWorkerSaturated",
+          "expr": "(flight_gateway_worker_inflight >= flight_gateway_worker_capacity) and (flight_gateway_worker_capacity > 0)",
+          "for": "5m",
+          "labels": {"severity": "warning"},
+          "annotations": {"summary": "Flight Worker has remained at capacity"}
+        },
+        {
+          "alert": "FlightRpcFailureIncrease",
+          "expr": "increase(flight_stage_duration_seconds_count{stage=\"rpc\",outcome=\"failure\"}[5m]) > 0",
+          "for": "0m",
+          "labels": {"severity": "warning"},
+          "annotations": {"summary": "Flight RPC failures increased"}
+        },
+        {
+          "alert": "FlightQueueP95High",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(flight_stage_duration_seconds_bucket{stage=\"queue\",outcome=\"success\"}[5m]))) > 10",
+          "for": "5m",
+          "labels": {"severity": "warning"},
+          "annotations": {"summary": "Flight queue P95 exceeded 10 seconds"}
+        }
+      ]
+    }
+  ]
+}

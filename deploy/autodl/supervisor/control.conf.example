@@ -1,0 +1,12 @@
+[program:flight-control]
+directory=%(ENV_FLIGHT_PROJECT_ROOT)s
+command=%(ENV_FLIGHT_PROJECT_ROOT)s/.venv/bin/python -m deploy.autodl.control --manifest %(ENV_FLIGHT_PROJECT_ROOT)s/runtime/autodl/cluster.json --runtime-root %(ENV_FLIGHT_PROJECT_ROOT)s/runtime/autodl --gateway-binary %(ENV_FLIGHT_PROJECT_ROOT)s/build/autodl/flight_gateway --backend qwen --model-path /srv/flight-example/models/Qwen --output-mode duration_components
+autostart=true
+autorestart=unexpected
+startsecs=10
+startretries=5
+stopsignal=TERM
+stopasgroup=true
+killasgroup=true
+stdout_logfile=%(ENV_FLIGHT_PROJECT_ROOT)s/runtime/autodl/logs/supervisor-control.log
+stderr_logfile=%(ENV_FLIGHT_PROJECT_ROOT)s/runtime/autodl/logs/supervisor-control-error.log

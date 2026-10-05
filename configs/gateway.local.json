@@ -1,0 +1,12 @@
+{
+  "listen": "127.0.0.1:50051",
+  "rpc_timeout_ms": 20000,
+  "health_interval_ms": 2000,
+  "health_timeout_ms": 500,
+  "failure_threshold": 3,
+  "open_cooldown_ms": 10000,
+  "minimum_retry_budget_ms": 500,
+  "workers": [
+    {"id": "worker-1", "address": "127.0.0.1:50052", "capacity": 1, "enabled": true}
+  ]
+}
